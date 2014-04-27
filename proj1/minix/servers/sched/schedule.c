@@ -13,6 +13,10 @@
 #include <minix/com.h>
 #include <machine/archtypes.h>
 #include "kernel/proc.h" /* for queue constants */
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <sys/resource.h>
 
 static timer_t sched_timer;
 static unsigned balance_timeout;
@@ -21,6 +25,8 @@ static unsigned balance_timeout;
 
 static int schedule_process(struct schedproc * rmp, unsigned flags);
 static void balance_queues(struct timer *tp);
+int do_lottery();
+void update_tickets(unsigned nice, struct schedproc *rmp);
 
 #define SCHEDULE_CHANGE_PRIO	0x1
 #define SCHEDULE_CHANGE_QUANTUM	0x2
@@ -45,6 +51,11 @@ static void balance_queues(struct timer *tp);
 
 /* processes created by RS are sysytem processes */
 #define is_system_proc(p)	((p)->parent == RS_PROC_NR)
+
+#define niceToPriority(nice)   MAX_USER_Q + (nice-PRIO_MIN) * (MIN_USER_Q-MAX_USER_Q+1) / (PRIO_MAX-PRIO_MIN+1);
+
+// Total number of tickets
+int totalTickets = 0;
 
 static unsigned cpu_proc[CONFIG_MAX_CPUS];
 
@@ -106,6 +117,11 @@ int do_noquantum(message *m_ptr)
 	if ((rv = schedule_process_local(rmp)) != OK) {
 		return rv;
 	}
+
+	// Do lottery
+	if((rv = do_lottery()) != OK)
+	  return rv;
+
 	return OK;
 }
 
@@ -115,7 +131,7 @@ int do_noquantum(message *m_ptr)
 int do_stop_scheduling(message *m_ptr)
 {
 	register struct schedproc *rmp;
-	int proc_nr_n;
+	int proc_nr_n, rv;
 
 	/* check who can send you requests */
 	if (!accept_message(m_ptr))
@@ -132,6 +148,17 @@ int do_stop_scheduling(message *m_ptr)
 	cpu_proc[rmp->cpu]--;
 #endif
 	rmp->flags = 0; /*&= ~IN_USE;*/
+	
+	// Subtract tickets from the total if we are stopping a user process
+	/*
+	if(!is_system_proc(rmp)){
+	  update_tickets((unsigned)m_ptr->SCHEDULING_MAXPRIO, rmp);
+	  totalTickets = totalTickets - rmp->tickets;
+	}
+	*/
+
+	if((rv = do_lottery()) != OK)
+	  return rv;
 
 	return OK;
 }
@@ -162,10 +189,11 @@ int do_start_scheduling(message *m_ptr)
 	/* Populate process slot */
 	rmp->endpoint     = m_ptr->SCHEDULING_ENDPOINT;
 	rmp->parent       = m_ptr->SCHEDULING_PARENT;
-	rmp->max_priority = (unsigned) m_ptr->SCHEDULING_MAXPRIO;
+	rmp->max_priority = niceToPriority((unsigned) m_ptr->SCHEDULING_MAXPRIO);
 	if (rmp->max_priority >= NR_SCHED_QUEUES) {
 		return EINVAL;
 	}
+	rmp->tickets = 5;
 
 	/* Inherit current priority and time slice from parent. Since there
 	 * is currently only one scheduler scheduling the whole system, this
@@ -246,6 +274,12 @@ int do_start_scheduling(message *m_ptr)
 	 */
 
 	m_ptr->SCHEDULING_SCHEDULER = SCHED_PROC_NR;
+	// Add tickets to total if we are starting a user process
+	
+	if(!is_system_proc(rmp)){
+	  //update_tickets((unsigned)m_ptr->SCHEDULING_MAXPRIO, rmp);
+	  totalTickets = totalTickets + rmp->tickets;
+	}
 
 	return OK;
 }
@@ -271,7 +305,7 @@ int do_nice(message *m_ptr)
 	}
 
 	rmp = &schedproc[proc_nr_n];
-	new_q = (unsigned) m_ptr->SCHEDULING_MAXPRIO;
+	new_q = niceToPriority((unsigned) m_ptr->SCHEDULING_MAXPRIO);
 	if (new_q >= NR_SCHED_QUEUES) {
 		return EINVAL;
 	}
@@ -288,6 +322,12 @@ int do_nice(message *m_ptr)
 		 * back the changes to proc struct */
 		rmp->priority     = old_q;
 		rmp->max_priority = old_max_q;
+	}
+	// Subtract the old number of tickets and add the new number of tickets
+	if(!is_system_proc(rmp)){
+	  totalTickets = totalTickets - rmp->tickets;
+	  update_tickets(m_ptr->SCHEDULING_MAXPRIO, rmp);
+	  totalTickets = totalTickets + rmp->tickets;
 	}
 
 	return rv;
@@ -323,7 +363,6 @@ static int schedule_process(struct schedproc * rmp, unsigned flags)
 		printf("PM: An error occurred when trying to schedule %d: %d\n",
 		rmp->endpoint, err);
 	}
-
 	return err;
 }
 
@@ -334,9 +373,12 @@ static int schedule_process(struct schedproc * rmp, unsigned flags)
 
 void init_scheduling(void)
 {
+        u64_t r;
 	balance_timeout = BALANCE_TIMEOUT * sys_hz();
 	init_timer(&sched_timer);
 	set_timer(&sched_timer, balance_timeout, balance_queues, 0);
+	read_tsc_64(&r);
+	srandom((unsigned int)r);
 }
 
 /*===========================================================================*
@@ -363,4 +405,55 @@ static void balance_queues(struct timer *tp)
 	}
 
 	set_timer(&sched_timer, balance_timeout, balance_queues, 0);
+}
+
+/*===========================================================================*
+ *                              do_lottery                                   *
+ *===========================================================================*/
+
+int do_lottery(){
+  struct schedproc *rmp;
+  int proc_nr;
+  int winTicket;
+  int old_priority;
+  int flag = -1;
+
+  // Lottery winner (from 0 to totalTickets-1)
+  winTicket = (int)random() % totalTickets;
+
+  // Lottery
+  // For each process, substract its tickets from the winning ticket
+  // If a process reduces the winning ticket past 0, it is the winner
+  for(proc_nr = 0, rmp = schedproc; proc_nr < NR_PROCS; proc_nr++, rmp++){
+    if((rmp->flags & IN_USE) && !is_system_proc(rmp)){
+      old_priority = rmp->priority;
+      if(winTicket >= 0){
+	winTicket = winTicket - rmp->tickets;
+
+	if(winTicket < 0){
+	  rmp->priority = USER_Q;
+	  flag = OK;
+	}
+      }
+      // Schedules a process if it won the lottery
+      // only the winning process changes priority
+      if(old_priority != rmp->priority)
+	schedule_process(rmp, SCHEDULE_CHANGE_PRIO);
+    }
+  }
+  return flag;
+
+}
+
+/*===========================================================================*
+ *                              update_tickets                               *
+ *===========================================================================*/
+
+void update_tickets(unsigned nice, struct schedproc *rmp){
+  if(nice > 100)
+    rmp->tickets = 100;
+  else if(nice < 1)
+    rmp->tickets = 1;
+  else
+    rmp->tickets = nice;
 }

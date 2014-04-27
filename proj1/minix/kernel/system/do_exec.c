@@ -40,8 +40,6 @@ int do_exec(struct proc * caller, message * m_ptr)
 
   name[sizeof(name)-1] = '\0';
 
-  printf("executing ... %s\n", name);
-
   /* Set process state. */
   arch_proc_init(rp, (u32_t) m_ptr->PR_IP_PTR, (u32_t) m_ptr->PR_STACK_PTR, name);
 

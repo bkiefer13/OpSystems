@@ -14,6 +14,8 @@
 #include <timers.h>
 #include "kernel/proc.h"
 
+#define is_system_proc(p) ((p)->mp_parent == PM_PROC_NR)
+
 /*===========================================================================*
  *				init_scheduling				     *
  *===========================================================================*/
@@ -34,6 +36,12 @@ void sched_init(void)
 			assert(_ENDPOINT_P(trmp->mp_endpoint) == INIT_PROC_NR);
 			parent_e = mproc[trmp->mp_parent].mp_endpoint;
 			assert(parent_e == trmp->mp_endpoint);
+			/*
+			if(is_system_proc(trmp))
+			  t = USER_Q;
+			else
+			  t = 5;
+			*/
 			s = sched_start(SCHED_PROC_NR,	/* scheduler_e */
 				trmp->mp_endpoint,	/* schedulee_e */
 				parent_e,		/* parent_e */
@@ -62,7 +70,10 @@ int sched_start_user(endpoint_t ep, struct mproc *rmp)
 	if ((rv = nice_to_priority(rmp->mp_nice, &maxprio)) != OK) {
 		return rv;
 	}
-	
+	/*
+	if(!is_system_proc(rmp))
+	  maxprio = 5;
+	*/
 	/* scheduler must know the parent, which is not the case for a child
 	 * of a system process created by a regular fork; in this case the 
 	 * scheduler should inherit settings from init rather than the real 
@@ -98,9 +109,16 @@ int sched_nice(struct mproc *rmp, int nice)
 	if (rmp->mp_scheduler == KERNEL || rmp->mp_scheduler == NONE)
 		return (EINVAL);
 
-	if ((rv = nice_to_priority(nice, &maxprio)) != OK) {
-		return rv;
+	// If the process is a system process, convert nice to priority
+	//if(is_system_proc(rmp)){
+	/*if ((rv = nice_to_priority(nice, &maxprio)) != OK) {
+	  return rv;
 	}
+	*/
+	  //}
+	// If the process is a user process, pass the nice directly
+	//else
+	maxprio = nice;
 
 	m.SCHEDULING_ENDPOINT	= rmp->mp_endpoint;
 	m.SCHEDULING_MAXPRIO	= (int) maxprio;

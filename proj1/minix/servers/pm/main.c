@@ -250,7 +250,8 @@ static int sef_cb_init_fresh(int UNUSED(type), sef_init_info_t *UNUSED(info))
 
 			/* Set scheduling info */
 			rmp->mp_scheduler = KERNEL;
-			rmp->mp_nice = get_nice_value(USR_Q);
+			//rmp->mp_nice = get_nice_value(USR_Q);
+			rmp->mp_nice = 5;
 		}
 		else {					/* system process */
   			if(ip->proc_nr == RS_PROC_NR) {
