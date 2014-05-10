@@ -35,6 +35,7 @@
 #define SETGROUPS	  32
 #define ACCESS		  33 
 #define GETGROUPS	  34
+#define SEM_INIT          35
 #define SYNC		  36 
 #define KILL		  37
 #define RENAME		  38
@@ -43,6 +44,7 @@
 #define DUP		  41 
 #define PIPE		  42 
 #define TIMES		  43
+#define SEM_RELEASE       44
 #define SYMLINK		  45
 #define SETGID		  46
 #define GETGID		  47
@@ -54,7 +56,9 @@
 #define LSTAT		  53
 #define IOCTL		  54
 #define FCNTL		  55
+#define SEM_UP            56
 #define FS_READY	  57
+#define SEM_DOWN          58
 #define EXEC		  59
 #define UMASK		  60 
 #define CHROOT		  61 

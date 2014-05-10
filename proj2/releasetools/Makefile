@@ -32,6 +32,7 @@ PROGRAMS+= ${PROGROOT}/servers/mfs/mfs
 PROGRAMS+= ${PROGROOT}/servers/vm/vm
 PROGRAMS+= ${PROGROOT}/servers/pfs/pfs
 PROGRAMS+= ${PROGROOT}/servers/init/init
+PROGRAMS+= ${PROGROOT}/servers/sem/sem
 
 usage:	
 	@echo " " >&2

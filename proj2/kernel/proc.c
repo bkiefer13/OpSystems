@@ -461,7 +461,7 @@ static int do_sync_ipc(struct proc * caller_ptr, /* who made the call */
 	 * SENDREC or NOTIFY, verify that the caller is allowed to send to
 	 * the given destination. 
 	 */
-	if (call_nr != RECEIVE)
+	/*	if (call_nr != RECEIVE)
 	{
 		if (!may_send_to(caller_ptr, src_dst_p)) {
 #if DEBUG_ENABLE_IPC_WARNINGS
@@ -470,9 +470,9 @@ static int do_sync_ipc(struct proc * caller_ptr, /* who made the call */
 				callname,
 				caller_ptr->p_endpoint, src_dst_e);
 #endif
-			return(ECALLDENIED);	/* call denied by ipc mask */
+                return(ECALLDENIED);	 call denied by ipc mask 
 		}
-	}
+		}*/
   }
 
   /* Check if the process has privileges for the requested call. Calls to the 

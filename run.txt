@@ -1,0 +1,1 @@
+qemu-system-x86_64 -rtc base=utc -net user -net nic -m 256 -hda minix3.img -redir tcp:2222::22

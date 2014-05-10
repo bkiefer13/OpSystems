@@ -75,6 +75,7 @@
 #define EILSEQ        (_SIGN 44 )  /* illegal byte sequence */
 #define	ENOMSG	      (_SIGN 45 )  /* No message of desired type */
 #define EOVERFLOW     (_SIGN 46 )  /* Value too large to be stored in data type */
+#define EINUSE        (_SIGN 47 )  /* semaphore */
 
 /* The following errors relate to networking. */
 #define EPACKSIZE     (_SIGN 50 )  /* invalid packet size for some protocol */

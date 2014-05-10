@@ -92,17 +92,11 @@ BINOWN= root
 BINGRP= operator
 UTMPGRP= utmp
 .if defined(__MINIX)
-BIN1+=	\
-	boot.cfg.default \
-	group hostname.file inet.conf \
-	make.conf man.conf \
-	motd mtab \
-	profile protocols \
-	resolv.conf \
-	rc rc.conf rc.cd rc.subr \
+BIN1+=	boot.cfg.default \
+	man.conf \
+	protocols rc rc.cd rc.subr \
 	rc.daemons.dist rs.inet rs.single \
 	services shells syslog.conf \
-	system.conf \
 	termcap utmp
 .else
 BIN1+=	bootptab changelist csh.cshrc csh.login \
@@ -324,10 +318,36 @@ install-etc-files: .PHONY .MAKE check_DESTDIR MAKEDEV
 	    master.passwd ${DESTDIR}/etc
 	${TOOL_PWD_MKDB} -p ${PWD_MKDB_ENDIAN} -d ${DESTDIR}/ \
 	    ${DESTDIR}/etc/master.passwd
+.if ${MKUNPRIVED} != "no"
+	( \
+		for metaent in passwd pwd.db spwd.db; do \
+			echo "./etc/$${metaent} type=file mode=0644 uname=root gname=operator tags=etc_pkg"; \
+		done; \
+	) | $METALOG.add}
+.endif # MKUNPRIVED != no
+
 .if defined(__MINIX)
+# BJG: Unsafe files for Minix
+.for owner group mode sdir tdir files in \
+		${BINOWN} ${BINGRP}	${BINMODE}	${NETBSDSRCDIR}/etc/ ${DESTDIR}/etc/ group \
+		${BINOWN} ${BINGRP}	${BINMODE}	${NETBSDSRCDIR}/etc/ ${DESTDIR}/etc/ hostname.file \
+		${BINOWN} ${BINGRP}	${BINMODE}	${NETBSDSRCDIR}/etc/ ${DESTDIR}/etc/ inet.conf \
+		${BINOWN} ${BINGRP}	${BINMODE}	${NETBSDSRCDIR}/etc/ ${DESTDIR}/etc/ mk.conf \
+		${BINOWN} ${BINGRP}	${BINMODE}	${NETBSDSRCDIR}/etc/ ${DESTDIR}/etc/ resolv.conf \
+		${BINOWN} ${BINGRP}	${BINMODE}	${NETBSDSRCDIR}/etc/ ${DESTDIR}/etc/ motd \
+		${BINOWN} ${BINGRP}	${BINMODE}	${NETBSDSRCDIR}/etc/ ${DESTDIR}/etc/ rc.conf \
+		${BINOWN} ${BINGRP}	${BINMODE}	${NETBSDSRCDIR}/etc/ ${DESTDIR}/etc/ profile
+	${_MKMSG_INSTALL} ${DESTDIR}${_dir}${file}
+	if [ ! -e ${tdir} ]; then \
+		${INSTALL_DIR} ${tdir}; \
+	fi; \
+	${INSTALL_FILE} -o ${owner} -g ${group} -m ${mode} ${sdir}${files} ${tdir};
+.endfor
 # LSC: We need a safe install target for etc files, as this is expected from
 # our current user base. This safe version only leaves out the master.passwd
 # file in order not to loose any user account created.
+#
+# BJG:
 #
 # LSC: To ensure minimal modifications, the logic is a bit contrived, i.e. the
 # NetBSD build system expect install-etc-files to be unsafe, so what was done
@@ -341,13 +361,6 @@ install-etc-files: .PHONY .MAKE check_DESTDIR MAKEDEV
 install-etc-files-safe: .PHONY .MAKE check_DESTDIR MAKEDEV
 # LSC Minix administrator group is operator, not wheel
 .endif # defined(__MINIX)
-.if ${MKUNPRIVED} != "no"
-	( \
-		for metaent in passwd pwd.db spwd.db; do \
-	    		echo "./etc/$${metaent} type=file mode=0644 uname=root gname=operator tags=etc_pkg"; \
-		done; \
-	) | ${METALOG.add}
-.endif	# MKUNPRIVED != no
 	${_MKMSG_INSTALL} ${DESTDIR}/etc/ttys
 .if !defined(__MINIX)
 	${ETC_INSTALL_OBJ_FILE} -o ${BINOWN} -g ${BINGRP} -m 644 \
@@ -423,28 +436,28 @@ install-etc-files-safe: .PHONY .MAKE check_DESTDIR MAKEDEV
 	${MAKEDIRTARGET} ${NETBSDSRCDIR}/external/bsd/atf/etc/atf configinstall
 .endif
 .else # LSC Minix Specific
-.for owner group mode sdir tdir file in \
+.for owner group mode sdir tdir files in \
 		${BINOWN} ${BINGRP}	${BINMODE}	${NETBSDSRCDIR}/etc/usr/ ${DESTDIR}/usr/etc/ daily \
 		${BINOWN} ${BINGRP}	${BINMODE}	${NETBSDSRCDIR}/etc/usr/ ${DESTDIR}/usr/etc/ dhcptags.conf \
 		${BINOWN} ${BINGRP}	${BINMODE}	${NETBSDSRCDIR}/etc/usr/ ${DESTDIR}/usr/etc/ rc \
 		${BINOWN} ${BINGRP}	${BINMODE}	${NETBSDSRCDIR}/etc/ ${DESTDIR}/usr/lib/ crontab \
+		${BINOWN} ${BINGRP}	${BINMODE}	${NETBSDSRCDIR}/etc/ ${DESTDIR}/etc/ system.conf \
 		${BINOWN} ${BINGRP}	${NONBINMODE}	${NETBSDSRCDIR}/etc/usr/ ${DESTDIR}/usr/ Makefile \
 		${BINOWN} ${BINGRP}	${BINMODE}	${NETBSDSRCDIR}/etc/devmand/scripts/ ${DESTDIR}/etc/devmand/scripts/ block  \
-		${BINOWN} ${BINGRP}	${BINMODE}	${NETBSDSRCDIR}/etc/devmand/scripts/ ${DESTDIR}/etc/devmand/scripts/ singlechar
+		${BINOWN} ${BINGRP}	${BINMODE}	${NETBSDSRCDIR}/etc/devmand/scripts/ ${DESTDIR}/etc/devmand/scripts/ singlechar \
+		${BINOWN} ${BINGRP} 	${NOBINMODE}	${NETBSDSRCDIR}/etc/ast/ ${DESTDIR}/usr/ast/ .[aepv]* \
+		${BINOWN} ${BINGRP}	${NOBINMODE}	${NETBSDSRCDIR}/etc/ast/ ${DESTDIR}/root/ .[aepv]* \
+		ast 	users		${NOBINMODE}	${NETBSDSRCDIR}/etc/ast/ ${DESTDIR}/home/ast/ .[aepv]* \
+		bin 	${BINGRP}	${NOBINMODE}	${NETBSDSRCDIR}/etc/ast/ ${DESTDIR}/home/bin/ .[aepv]* \
 	${_MKMSG_INSTALL} ${DESTDIR}${_dir}${file}
 	if [ ! -e ${tdir} ]; then \
-		mkdir -p ${tdir}; \
+		${INSTALL_DIR} ${tdir}; \
 	fi; \
-	if [ ! -e ${tdir}${file} -o -s ${tdir}${file} ]; then \
-		${ETC_INSTALL_FILE} -o ${owner} -g ${group} -m ${mode} \
-    			${sdir}${file} ${tdir}${file}; \
-	else true; fi
+	${INSTALL_FILE} -o ${owner} -g ${group} -m ${mode} ${sdir}${files} ${tdir};
 .endfor
 .for subdir in . defaults mtree
 	${MAKEDIRTARGET} ${subdir} configinstall
 .endfor
-	${_MKMSG_INSTALL} ${DESTDIR}/usr/ast and ${DESTDIR}/root
-	for u in ${DESTDIR}/usr/ast ${DESTDIR}/root; do  ${INSTALL_DIR} $$u; cp ${NETBSDSRCDIR}/etc/ast/.[aepv]* $$u; done
 	${_MKMSG_INSTALL} ${DESTDIR}/usr/lib/fonts
 	${INSTALL_DIR} ${DESTDIR}/usr/lib/fonts
 	${INSTALL_FILE} -m ${BINMODE} -o ${BINOWN} -g ${BINGRP} ${NETBSDSRCDIR}/etc/fonts/*.fnt ${DESTDIR}/usr/lib/fonts/

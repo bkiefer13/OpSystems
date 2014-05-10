@@ -109,6 +109,10 @@ int	 execv(const char *, char * const *);
 int	 execve(const char *, char * const *, char * const *);
 int	 execvp(const char *, char * const *);
 pid_t	 fork(void);
+int      sem_init(int start_value);
+int      sem_up(int semaphore_number);
+int      sem_down(int semaphore number);
+int      sem_release(int semaphore);
 long	 fpathconf(int, int);
 #if __SSP_FORTIFY_LEVEL == 0
 char	*getcwd(char *, size_t);
