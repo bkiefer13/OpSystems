@@ -1,10 +1,11 @@
-PROG = sem
-SRCS = main.c sem.c
+# Makefile for Semaphore Server
+PROG=	sem
+SRCS=	main.c sem.c
 
-DPADD += ${LIBSYS}
-LDADD += -lsys
+DPADD+=	${LIBSYS}
+LDADD+=	-lsys
 
-MAN  =
+MAN=
 
 BINDIR?= /usr/sbin
 

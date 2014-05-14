@@ -80,7 +80,7 @@
 #define warnx		_warnx
 
 #ifdef __weak_alias
-#define sem_init                _sem_init
+#define sem_init			_sem_init
 #define MD2Data			_MD2Data
 #define MD2End			_MD2End
 #define MD2FileChunk		_MD2FileChunk

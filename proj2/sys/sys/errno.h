@@ -73,9 +73,9 @@
 #define ERESTART      (_SIGN 41 )  /* service restarted */
 #define EIDRM         (_SIGN 43 )  /* Identifier removed */
 #define EILSEQ        (_SIGN 44 )  /* illegal byte sequence */
-#define	ENOMSG	      (_SIGN 45 )  /* No message of desired type */
+#define ENOMSG	      (_SIGN 45 )  /* No message of desired type */
 #define EOVERFLOW     (_SIGN 46 )  /* Value too large to be stored in data type */
-#define EINUSE        (_SIGN 47 )  /* semaphore */
+#define EINUSE			(_SIGN 47) /* Processes enqueued into semaphore */
 
 /* The following errors relate to networking. */
 #define EPACKSIZE     (_SIGN 50 )  /* invalid packet size for some protocol */
@@ -107,7 +107,7 @@
 #define EOPNOTSUPP    (_SIGN 76 )  /* Operation not supported */
 #define ENOTSUP       ( EOPNOTSUPP )  /* Not supported */
 #define ENETDOWN      (_SIGN 77 )  /* network is down */
-#define	EPFNOSUPPORT  (_SIGN 78 ) /* Protocol family not supported */
+#define EPFNOSUPPORT  (_SIGN 78 ) /* Protocol family not supported */
 #define	EDESTADDRREQ  (_SIGN 79 )  /* Destination address required */
 #define EHOSTDOWN     (_SIGN 80 )  /* Host is down */
 #define ENETRESET     (_SIGN 81 )  /* Network dropped connection on reset */

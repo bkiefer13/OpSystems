@@ -321,13 +321,12 @@ install-etc-files: .PHONY .MAKE check_DESTDIR MAKEDEV
 .if ${MKUNPRIVED} != "no"
 	( \
 		for metaent in passwd pwd.db spwd.db; do \
-			echo "./etc/$${metaent} type=file mode=0644 uname=root gname=operator tags=etc_pkg"; \
+	    		echo "./etc/$${metaent} type=file mode=0644 uname=root gname=operator tags=etc_pkg"; \
 		done; \
-	) | $METALOG.add}
-.endif # MKUNPRIVED != no
-
+	) | ${METALOG.add}
+.endif	# MKUNPRIVED != no
 .if defined(__MINIX)
-# BJG: Unsafe files for Minix
+# BJG: Unsafe (i.e. user-editable) files for Minix
 .for owner group mode sdir tdir files in \
 		${BINOWN} ${BINGRP}	${BINMODE}	${NETBSDSRCDIR}/etc/ ${DESTDIR}/etc/ group \
 		${BINOWN} ${BINGRP}	${BINMODE}	${NETBSDSRCDIR}/etc/ ${DESTDIR}/etc/ hostname.file \
@@ -336,7 +335,7 @@ install-etc-files: .PHONY .MAKE check_DESTDIR MAKEDEV
 		${BINOWN} ${BINGRP}	${BINMODE}	${NETBSDSRCDIR}/etc/ ${DESTDIR}/etc/ resolv.conf \
 		${BINOWN} ${BINGRP}	${BINMODE}	${NETBSDSRCDIR}/etc/ ${DESTDIR}/etc/ motd \
 		${BINOWN} ${BINGRP}	${BINMODE}	${NETBSDSRCDIR}/etc/ ${DESTDIR}/etc/ rc.conf \
-		${BINOWN} ${BINGRP}	${BINMODE}	${NETBSDSRCDIR}/etc/ ${DESTDIR}/etc/ profile
+		${BINOWN} ${BINGRP}	${BINMODE}	${NETBSDSRCDIR}/etc/ ${DESTDIR}/etc/ profile 
 	${_MKMSG_INSTALL} ${DESTDIR}${_dir}${file}
 	if [ ! -e ${tdir} ]; then \
 		${INSTALL_DIR} ${tdir}; \
@@ -347,7 +346,7 @@ install-etc-files: .PHONY .MAKE check_DESTDIR MAKEDEV
 # our current user base. This safe version only leaves out the master.passwd
 # file in order not to loose any user account created.
 #
-# BJG:
+# BJG: For Minix, the -safe target *is* performed by "make build"
 #
 # LSC: To ensure minimal modifications, the logic is a bit contrived, i.e. the
 # NetBSD build system expect install-etc-files to be unsafe, so what was done
@@ -445,10 +444,11 @@ install-etc-files-safe: .PHONY .MAKE check_DESTDIR MAKEDEV
 		${BINOWN} ${BINGRP}	${NONBINMODE}	${NETBSDSRCDIR}/etc/usr/ ${DESTDIR}/usr/ Makefile \
 		${BINOWN} ${BINGRP}	${BINMODE}	${NETBSDSRCDIR}/etc/devmand/scripts/ ${DESTDIR}/etc/devmand/scripts/ block  \
 		${BINOWN} ${BINGRP}	${BINMODE}	${NETBSDSRCDIR}/etc/devmand/scripts/ ${DESTDIR}/etc/devmand/scripts/ singlechar \
-		${BINOWN} ${BINGRP} 	${NOBINMODE}	${NETBSDSRCDIR}/etc/ast/ ${DESTDIR}/usr/ast/ .[aepv]* \
-		${BINOWN} ${BINGRP}	${NOBINMODE}	${NETBSDSRCDIR}/etc/ast/ ${DESTDIR}/root/ .[aepv]* \
-		ast 	users		${NOBINMODE}	${NETBSDSRCDIR}/etc/ast/ ${DESTDIR}/home/ast/ .[aepv]* \
-		bin 	${BINGRP}	${NOBINMODE}	${NETBSDSRCDIR}/etc/ast/ ${DESTDIR}/home/bin/ .[aepv]* \
+		${BINOWN} ${BINGRP}	${NONBINMODE}	${NETBSDSRCDIR}/etc/ast/ ${DESTDIR}/usr/ast/ .[aepv]* \
+		${BINOWN} ${BINGRP}	${NONBINMODE}	${NETBSDSRCDIR}/etc/ast/ ${DESTDIR}/root/ .[aepv]* \
+		ast	  users		${NONBINMODE}	${NETBSDSRCDIR}/etc/ast/ ${DESTDIR}/home/ast/ .[aepv]* \
+		bin	  ${BINGRP}	${NONBINMODE}	${NETBSDSRCDIR}/etc/ast/ ${DESTDIR}/home/bin/ .[aepv]* \
+
 	${_MKMSG_INSTALL} ${DESTDIR}${_dir}${file}
 	if [ ! -e ${tdir} ]; then \
 		${INSTALL_DIR} ${tdir}; \

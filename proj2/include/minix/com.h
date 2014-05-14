@@ -27,7 +27,7 @@
  *   0x1400 - 0x14FF	VFS-FS transaction IDs
  *   0x1500 - 0x15FF	Block device requests and responses
  *   0x1600 - 0x16FF	VirtualBox (VBOX) requests (see vboxif.h)
- *   0x1700 - 0x17FF    Semaphore server
+ *   0x1700 - 0x17FF	Semaphore server requests	
  *
  * Zero and negative values are widely used for OK and error responses.
  */
@@ -81,10 +81,12 @@
 #define VM_PROC_NR   ((endpoint_t) 8)   /* memory server */
 #define PFS_PROC_NR  ((endpoint_t) 9)  /* pipe filesystem */
 #define SCHED_PROC_NR ((endpoint_t) 10)	/* scheduler */
+#define SEM_PROC_NR ((endpoint_t) 11)	/* semaphore service */
+#define LAST_SPECIAL_PROC_NR	12	/* An untyped version for computation in macros.*/
+#define INIT_PROC_NR ((endpoint_t) LAST_SPECIAL_PROC_NR)  /* init   -- goes multiuser */
 
-#define SEM_PROC_NR ((endpoint_t) 11) /* semaphore */
-#define LAST_SPECIAL_PROC_NR  12  /* untyped */
-#define INIT_PROC_NR ((endpoint_t) LAST_SPECIAL_PROC_NR) /* init */
+
+
 #define NR_BOOT_MODULES (INIT_PROC_NR+1)
 
 /* Root system process and root user process. */
@@ -1245,10 +1247,15 @@
 /*===========================================================================*
  *			Messages for block devices			     *
  *===========================================================================*/
+ 
+ /*Base type for semaphore service requests */
 
-/* Base type for semaphore service */
 #define SEM_NUMBER m2_i1
 #define SEM_VALUE m2_i2
+
+/*===========================================================================*
+ *			Messages for block devices			     *
+ *===========================================================================*/
 
 /* Base type for block device requests and responses. */
 #define BDEV_RQ_BASE	0x1500

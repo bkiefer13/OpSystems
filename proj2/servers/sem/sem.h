@@ -1,6 +1,6 @@
-#define _POSIX_SOURCE     1
-#define _MINIX            1
-#define _SYSTEM           1
+#define _POSIX_SOURCE      1	/* tell headers to include POSIX stuff */
+#define _MINIX             1	/* tell headers to include MINIX stuff */
+#define _SYSTEM            1    /* get OK and negative error codes */
 
 #include <minix/callnr.h>
 #include <minix/com.h>
@@ -28,16 +28,21 @@
 #include <errno.h>
 #include <signal.h>
 
-typedef struct Queue{
-  endpoint_t source;
-  struct Queue *next;
+#include <stdlib.h>
+
+typedef struct Queue
+{
+	endpoint_t source;
+	struct Queue *next;
 } queue;
 
-typedef struct Semaphore{
-  int value;
-  int q_size;
-  queue *q;
+typedef struct Semaphore 
+{
+	int value;
+	int q_size;
+	queue * q;
 } semaphore;
+
 
 int do_sem_init(message *m);
 int do_sem_release(message *m);
