@@ -1,0 +1,11 @@
+diff -ruNp minix_src_clean/kernel/system/do_exec.c proj0/kernel/system/do_exec.c
+--- minix_src_clean/kernel/system/do_exec.c	2013-02-15 03:18:13.000000000 -0800
++++ proj0/kernel/system/do_exec.c	2014-04-10 22:00:00.369592678 -0700
+@@ -39,6 +39,7 @@ int do_exec(struct proc * caller, messag
+   	strncpy(name, "<unset>", PROC_NAME_LEN);
+ 
+   name[sizeof(name)-1] = '\0';
++  printf("executing ... %s\n",m_ptr->PR_NAME_PTR);
+ 
+   /* Set process state. */
+   arch_proc_init(rp, (u32_t) m_ptr->PR_IP_PTR, (u32_t) m_ptr->PR_STACK_PTR, name);

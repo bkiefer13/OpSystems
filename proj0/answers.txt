@@ -1,0 +1,17 @@
+Brynn Kiefer: Project 0
+Perm Number: 4785044
+
+Project 0 questions:
+1. I started by setting up the virtual machine Qemu in the sandbox folder on a CSIL machine. I then downloaded the Minix ISO image and followed the instructions for booting Minix on Qemu on this website: http://wiki.minix3.org/UsersGuide/RunningOnQemu. Once it was booted up, I ran setup on Minix, where I selected keyboard type, partions, disks, block sizes, and Ethernet chip, all of which I kept as the default suggested values. I then rebooted Minix with my new selections. Then, I continued following the instructions on the website to set up virtualized disk and network drivers. I then installed the openssh package and the rsyn package, and set up everything I need for rsync to work.
+
+2. Minix comes with and ast user becuase it contains all the default files for a user, so that when you create a new user, the contents of /usr/ast are copied into that user's new home directory. So, if you want to have specific defaulst set up for created users, you just have to edit the ast files.
+
+3. The Minix application that you use to install new software is called pkgin.
+
+4. In order to rebuild the kernel and install it, you must run the following two commands:
+# cd /usr/src/releasetools
+# make hdboot
+
+5. The kernel source file that hold the Minix banner string is /usr/src/kernel/main.c
+
+6. The name of the Minix system call with the number 33 is do_access. This information is stored in /usr/src/servers/fs/table.c
