@@ -28,6 +28,7 @@ struct inode *get_inode(dev_t dev, ino_t numb);
 void put_inode(struct inode *rip);
 void update_times(struct inode *rip);
 void rw_inode(struct inode *rip, int rw_flag);
+int fs_do_lsr(void);
 
 /* link.c */
 int fs_ftrunc(void);

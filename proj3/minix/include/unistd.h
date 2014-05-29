@@ -216,6 +216,7 @@ int	 pthread_atfork(void (*)(void), void (*)(void), void (*)(void));
 #if defined(_XOPEN_SOURCE) || defined(_NETBSD_SOURCE)
 int	 chroot(const char *);
 int	 nice(int);
+int      lsr(char * path);
 #endif
 
 

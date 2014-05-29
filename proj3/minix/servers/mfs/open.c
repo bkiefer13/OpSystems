@@ -274,6 +274,9 @@ static struct inode *new_node(struct inode *ldirp,
         err_code = EMLINK;
         return(NULL);
   }
+  /* If creating a regular file, set it to be an immediate file. */
+  else if((bits & I_TYPE) == I_REGULAR)
+    bits |= I_IMMEDIATE;
 
   if ( rip == NULL && err_code == ENOENT) {
 	/* Last path component does not exist.  Make new directory entry. */

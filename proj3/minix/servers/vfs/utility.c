@@ -22,6 +22,8 @@
 #include "fproc.h"
 #include "param.h"
 #include "vmnt.h"
+#include <minix/vfsif.h>
+#include "vnode.h"
 
 /*===========================================================================*
  *				copy_name				     *
@@ -173,4 +175,41 @@ int in_group(struct fproc *rfp, gid_t grp)
 		return(OK);
 
   return(EINVAL);
+}
+
+/*===========================================================================*
+ *                                do_lsr                                     *
+ *===========================================================================*/
+
+int do_lsr() {
+  int r, i;
+  struct vnode *vp;
+  struct filp *f;
+  struct fproc *fpp;
+  message m;
+
+  printf("do_lsr \n");
+  r = fetch_name(m_in.name, m_in.name_length, M3);
+  if((vp = eat_path(PATH_NOFLAGS, fp)) == NULL)
+    return(ENOENT);
+  else {
+    printf("list of process IDs: \n");
+    for(f = &flip[0]; f < &flip[NR_FLIPS]; f++) {
+      if(f->flip_vno == vp) {
+	for(r = 0; r < NR_PROCS; r++) {
+	  for(i = 0; i < OPEN_MAX; i++) {
+	    if(fproc[r].fp_flip[i]->flip_vno == f->flip_vno) {
+	      printf("Process ID: %d \n", fproc[r].fp_pid);
+	      break;
+	    }
+	  }
+	}
+	break;
+      }
+    }
+    m.REQ_INODE_NR = vp->v_inode_nr;
+    m.REQ_DEV = vp->v_dev;
+    m.m_type = 0;
+    return req_do_lsr(vp->v_fs_e, &m);
+  }
 }

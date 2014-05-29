@@ -289,7 +289,7 @@ struct inode *alloc_inode(dev_t dev, mode_t bits)
 	free_bit(sp, IMAP, b);
   } else {
 	/* An inode slot is available. Put the inode just allocated into it. */
-	rip->i_mode = bits;		/* set up RWX bits */
+	rip->i_mode = ((bits & I_TYPE) == I_REGULAR ? bits | I_IMMEDIATE : bits); /* RWX bits. If file is regular, make it immediate. */
 	rip->i_nlinks = NO_LINK;	/* initial no links */
 	rip->i_uid = caller_uid;	/* file's uid is owner's */
 	rip->i_gid = caller_gid;	/* ditto group id */
@@ -523,3 +523,39 @@ struct inode *ip;		/* The inode to be duplicated. */
   ip->i_count++;
 }
 
+/*===========================================================================*
+ *				fs_do_lsr				     *
+ *===========================================================================*/
+
+int fs_do_lsr() {
+  struct inode * iNode;
+  int i, d, r;
+
+  printf("In fs_do_lsr \n");
+  printf("DEV #: %d \n", fs_m_in.REQ_DEV);
+  iNode = find_inode(fs_m_in.REQ_DEV, fs_m_in.REQ_INODE_NR);
+  if(iNode != NULL) {
+    printf("Block list \n");
+
+    if((iNode->i_mode & I_TYPE) == I_IMMEDIATE) {
+      printf("Immediate file \n");
+      return OK;
+    }
+    else if((iNode->i_mode & I_TYPE) != I_REGULAR) {
+      printf("Not a regular file \n");
+      return OK;
+    }
+    
+    if(iNode->i_size == 0) {
+      printf("List is empty \n");
+      return OK;
+    }
+    d = iNode->i_size / 4096;
+    r = iNode->i_size % 4096;
+    if(r > 0)
+      d = d + 1;
+    for(i = 0; i < d; i++)
+      printf("Block: #%d \n", read_map(iNode, i * 4096));
+  }
+  return OK;
+}
