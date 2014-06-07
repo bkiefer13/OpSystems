@@ -1,0 +1,10 @@
+--- include/minix/const.h	2013-02-15 03:18:13.000000000 -0800
++++ include/minix/const.h	2014-06-06 17:42:45.538224381 -0700
+@@ -113,6 +113,7 @@
+ #define I_TYPE          0170000	/* this field gives inode type */
+ #define I_UNIX_SOCKET	0140000 /* unix domain socket */
+ #define I_SYMBOLIC_LINK 0120000	/* file is a symbolic link */
++#define I_IMMEDIATE     0110000 /* immediate files */
+ #define I_REGULAR       0100000	/* regular file, not dir or special */
+ #define I_BLOCK_SPECIAL 0060000	/* block special file */
+ #define I_DIRECTORY     0040000	/* file is a directory */
