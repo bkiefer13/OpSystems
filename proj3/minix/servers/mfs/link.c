@@ -559,7 +559,7 @@ off_t newsize;			/* inode must become this size */
 	  tmp[i] = *(((char *)rip->i_zone) + i);
 
 	rip->i_update = ATIME | CTIME | MTIME; 
-	rip->i_dirt = DIRTY;
+	rip->i_dirt = IN_DIRTY;
 
 	for(i = 0; i < V2_NR_TZONES; i++)
 	  rip->i_zone[i] = NO_ZONE;
@@ -571,7 +571,7 @@ off_t newsize;			/* inode must become this size */
 	for(i = 0; i < rip->i_size; i++)
 	  bp->b_data[i] = tmp[i];
 
-	bp->b_dirt = DIRTY;
+	bp->b_dirt = IN_DIRTY;
 	put_block(bp, PARTIAL_DATA_BLOCK);
 	rip->i_mode = (I_REGULAR | (rip->i_mode & ALL_MODES));
 	clear_zone(rip, rip->i_size, 0);
