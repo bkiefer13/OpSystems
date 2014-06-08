@@ -111,7 +111,7 @@ int fs_readwrite(void)
 	for(i = 0; i < f_size; i++)
 	  bp->b_data[i] = tmp[i];
 
-	bp->b_dirt = IN_DIRTY;
+	bp->b_dirty = IN_DIRTY;
 	put_block(bp, PARTIAL_DATA_BLOCK);
 	position += f_size;
 	rip->i_mode = (I_REGULAR | (rip->i_mode & ALL_MODES));

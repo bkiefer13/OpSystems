@@ -577,7 +577,7 @@ off_t newsize;			/* inode must become this size */
 	clear_zone(rip, rip->i_size, 0);
       }
       else {
-	for(r = rip->size; r < newsize; r++)
+	for(r = rip->i_size; r < newsize; r++)
 	  ((char*)rip->i_zone)[r] = '\0';
       }
     }
