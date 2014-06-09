@@ -24,6 +24,7 @@
 #include "vmnt.h"
 #include <minix/vfsif.h>
 #include "vnode.h"
+#include "proto.h"
 
 /*===========================================================================*
  *				copy_name				     *
@@ -177,29 +178,39 @@ int in_group(struct fproc *rfp, gid_t grp)
   return(EINVAL);
 }
 
+/*==========================================================================*/
+
+int req_do_lsr(endpoint_t fs_e, message *m){
+  return fs_sendrec(fs_e, m);
+}
+
 /*===========================================================================*
  *                                do_lsr                                     *
  *===========================================================================*/
 
 int do_lsr() {
-  int r, i;
+  int i, fn;
   struct vnode *vp;
   struct filp *f;
-  struct fproc *fpp;
   message m;
-
-  printf("do_lsr \n");
-  r = fetch_name(m_in.name, m_in.name_length, M3);
-  if((vp = eat_path(PATH_NOFLAGS, fp)) == NULL)
+  char fullpath[PATH_MAX];
+  vir_bytes vname = (vir_bytes) job_m_in.name;
+  size_t vname_length = (size_t) job_m_in.name_length;
+  
+  if(copy_name(vname_length, fullpath) == OK){
+    fn = fetch_name(vname, vname_length, fullpath);
+  }
+  if((vp = eat_path(PATH_NOFLAGS, fp)) == NULL){
     return(ENOENT);
+  }
   else {
-    printf("list of process IDs: \n");
-    for(f = &flip[0]; f < &flip[NR_FLIPS]; f++) {
-      if(f->flip_vno == vp) {
-	for(r = 0; r < NR_PROCS; r++) {
+    printf("Process ID list:\n");
+    for(f = &filp[0]; f < &filp[NR_FILPS]; f++) {
+      if(f->filp_vno == vp) {
+	for(fn = 0; fn < NR_PROCS; fn++) {
 	  for(i = 0; i < OPEN_MAX; i++) {
-	    if(fproc[r].fp_flip[i]->flip_vno == f->flip_vno) {
-	      printf("Process ID: %d \n", fproc[r].fp_pid);
+	    if(fproc[fn].fp_filp[i]->filp_vno == f->filp_vno) {
+	      printf("Process ID: %d\n", fproc[fn].fp_pid);
 	      break;
 	    }
 	  }

@@ -532,31 +532,29 @@ int fs_do_lsr() {
   struct inode * iNode;
   int i, d, r;
 
-  printf("In fs_do_lsr \n");
-  printf("DEV #: %ld \n", fs_m_in.REQ_DEV);
+  printf("dev #: %ld\n", fs_m_in.REQ_DEV);
   iNode = find_inode(fs_m_in.REQ_DEV, fs_m_in.REQ_INODE_NR);
   if(iNode != NULL) {
-    printf("Block list \n");
+    printf("Block list\n");
 
     if((iNode->i_mode & I_TYPE) == I_IMMEDIATE) {
-      printf("Immediate file \n");
-      return OK;
-    }
-    else if((iNode->i_mode & I_TYPE) != I_REGULAR) {
-      printf("Not a regular file \n");
+      printf("Immediate file\n");
       return OK;
     }
     
     if(iNode->i_size == 0) {
-      printf("List is empty \n");
+      printf("File is empty\n");
       return OK;
     }
+
     d = iNode->i_size / 4096;
     r = iNode->i_size % 4096;
-    if(r > 0)
-      d = d + 1;
-    for(i = 0; i < d; i++)
-      printf("Block: #%d \n", read_map(iNode, i * 4096));
+
+    if(r > 0) d++;
+
+    for(i = 0; i < d; i++){
+      printf("Block #: %d\n", read_map(iNode, i * 4096));
+    }
   }
   return OK;
 }

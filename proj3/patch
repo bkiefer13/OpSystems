@@ -1,6 +1,6 @@
-diff -ruNp minix_src_clean/include/minix/callnr.h test/include/minix/callnr.h
+diff -ruNp minix_src_clean/include/minix/callnr.h proj3/include/minix/callnr.h
 --- minix_src_clean/include/minix/callnr.h	2013-02-15 03:18:13.000000000 -0800
-+++ test/include/minix/callnr.h	2014-06-06 17:38:27.898988000 -0700
++++ proj3/include/minix/callnr.h	2014-06-06 17:38:27.898988000 -0700
 @@ -65,6 +65,7 @@
  #define SETGROUPS_O	  66
  #define GETMCONTEXT       67
@@ -9,9 +9,9 @@ diff -ruNp minix_src_clean/include/minix/callnr.h test/include/minix/callnr.h
  
  /* Posix signal handling. */
  #define SIGACTION	  71
-diff -ruNp minix_src_clean/include/minix/const.h test/include/minix/const.h
+diff -ruNp minix_src_clean/include/minix/const.h proj3/include/minix/const.h
 --- minix_src_clean/include/minix/const.h	2013-02-15 03:18:13.000000000 -0800
-+++ test/include/minix/const.h	2014-06-06 17:38:27.900988000 -0700
++++ proj3/include/minix/const.h	2014-06-06 17:38:27.900988000 -0700
 @@ -113,6 +113,7 @@
  #define I_TYPE          0170000	/* this field gives inode type */
  #define I_UNIX_SOCKET	0140000 /* unix domain socket */
@@ -20,9 +20,9 @@ diff -ruNp minix_src_clean/include/minix/const.h test/include/minix/const.h
  #define I_REGULAR       0100000	/* regular file, not dir or special */
  #define I_BLOCK_SPECIAL 0060000	/* block special file */
  #define I_DIRECTORY     0040000	/* file is a directory */
-diff -ruNp minix_src_clean/include/unistd.h test/include/unistd.h
+diff -ruNp minix_src_clean/include/unistd.h proj3/include/unistd.h
 --- minix_src_clean/include/unistd.h	2013-02-15 03:18:13.000000000 -0800
-+++ test/include/unistd.h	2014-06-06 17:38:27.913988000 -0700
++++ proj3/include/unistd.h	2014-06-06 17:38:27.913988000 -0700
 @@ -216,6 +216,7 @@ int	 pthread_atfork(void (*)(void), void
  #if defined(_XOPEN_SOURCE) || defined(_NETBSD_SOURCE)
  int	 chroot(const char *);
@@ -31,9 +31,9 @@ diff -ruNp minix_src_clean/include/unistd.h test/include/unistd.h
  #endif
  
  
-diff -ruNp minix_src_clean/lib/libc/sys-minix/access.c test/lib/libc/sys-minix/access.c
+diff -ruNp minix_src_clean/lib/libc/sys-minix/access.c proj3/lib/libc/sys-minix/access.c
 --- minix_src_clean/lib/libc/sys-minix/access.c	2013-02-15 03:18:14.000000000 -0800
-+++ test/lib/libc/sys-minix/access.c	2014-06-06 17:38:27.920988000 -0700
++++ proj3/lib/libc/sys-minix/access.c	2014-06-06 17:38:27.920988000 -0700
 @@ -18,3 +18,9 @@ int mode;
    _loadname(name, &m);
    return(_syscall(VFS_PROC_NR, ACCESS, &m));
@@ -44,9 +44,9 @@ diff -ruNp minix_src_clean/lib/libc/sys-minix/access.c test/lib/libc/sys-minix/a
 +  _loadname(path, &m);
 +  return(_syscall(VFS_PROC_NR, 70, &m));
 +}
-diff -ruNp minix_src_clean/servers/mfs/inode.c test/servers/mfs/inode.c
+diff -ruNp minix_src_clean/servers/mfs/inode.c proj3/servers/mfs/inode.c
 --- minix_src_clean/servers/mfs/inode.c	2013-02-15 03:18:14.000000000 -0800
-+++ test/servers/mfs/inode.c	2014-06-08 15:37:19.702240718 -0700
++++ proj3/servers/mfs/inode.c	2014-06-09 12:36:03.203274878 -0700
 @@ -289,7 +289,8 @@ struct inode *alloc_inode(dev_t dev, mod
  	free_bit(sp, IMAP, b);
    } else {
@@ -57,7 +57,7 @@ diff -ruNp minix_src_clean/servers/mfs/inode.c test/servers/mfs/inode.c
  	rip->i_nlinks = NO_LINK;	/* initial no links */
  	rip->i_uid = caller_uid;	/* file's uid is owner's */
  	rip->i_gid = caller_gid;	/* ditto group id */
-@@ -523,3 +524,39 @@ struct inode *ip;		/* The inode to be du
+@@ -523,3 +524,37 @@ struct inode *ip;		/* The inode to be du
    ip->i_count++;
  }
  
@@ -69,38 +69,36 @@ diff -ruNp minix_src_clean/servers/mfs/inode.c test/servers/mfs/inode.c
 +  struct inode * iNode;
 +  int i, d, r;
 +
-+  printf("In fs_do_lsr \n");
-+  printf("DEV #: %ld \n", fs_m_in.REQ_DEV);
++  printf("dev #: %ld\n", fs_m_in.REQ_DEV);
 +  iNode = find_inode(fs_m_in.REQ_DEV, fs_m_in.REQ_INODE_NR);
 +  if(iNode != NULL) {
-+    printf("Block list \n");
++    printf("Block list\n");
 +
 +    if((iNode->i_mode & I_TYPE) == I_IMMEDIATE) {
-+      printf("Immediate file \n");
-+      return OK;
-+    }
-+    else if((iNode->i_mode & I_TYPE) != I_REGULAR) {
-+      printf("Not a regular file \n");
++      printf("Immediate file\n");
 +      return OK;
 +    }
 +    
 +    if(iNode->i_size == 0) {
-+      printf("List is empty \n");
++      printf("File is empty\n");
 +      return OK;
 +    }
++
 +    d = iNode->i_size / 4096;
 +    r = iNode->i_size % 4096;
-+    if(r > 0)
-+      d = d + 1;
-+    for(i = 0; i < d; i++)
-+      printf("Block: #%d \n", read_map(iNode, i * 4096));
++
++    if(r > 0) d++;
++
++    for(i = 0; i < d; i++){
++      printf("Block #: %d\n", read_map(iNode, i * 4096));
++    }
 +  }
 +  return OK;
 +}
-diff -ruNp minix_src_clean/servers/mfs/link.c test/servers/mfs/link.c
+diff -ruNp minix_src_clean/servers/mfs/link.c proj3/servers/mfs/link.c
 --- minix_src_clean/servers/mfs/link.c	2013-02-15 03:18:14.000000000 -0800
-+++ test/servers/mfs/link.c	2014-06-08 16:08:41.338049802 -0700
-@@ -538,12 +538,52 @@ off_t newsize;			/* inode must become th
++++ proj3/servers/mfs/link.c	2014-06-09 12:36:49.453778586 -0700
+@@ -538,12 +538,56 @@ off_t newsize;			/* inode must become th
  
    /* Free the actual space if truncating. */
    if (newsize < rip->i_size) {
@@ -108,7 +106,7 @@ diff -ruNp minix_src_clean/servers/mfs/link.c test/servers/mfs/link.c
 -  		return(r);
 -  }
 +    if((rip->i_mode & I_TYPE) == I_IMMEDIATE) {
-+      /* Leave data alone. */ 
++      // Do nothing 
 +    }
 +    else if((r = freesp_inode(rip, newsize, rip->i_size)) != OK)
 +      return(r);
@@ -125,21 +123,25 @@ diff -ruNp minix_src_clean/servers/mfs/link.c test/servers/mfs/link.c
 +	register int i;
 +	register struct buf *bp;
 +	
-+	for(i = 0; i < rip->i_size; i++)
++	for(i = 0; i < rip->i_size; i++){
 +	  tmp[i] = *(((char *)rip->i_zone) + i);
++	}
 +
++	IN_MARKDIRTY(rip);
 +	rip->i_update = ATIME | CTIME | MTIME; 
-+	rip->i_dirt = IN_DIRTY;
 +
-+	for(i = 0; i < V2_NR_TZONES; i++)
++	for(i = 0; i < V2_NR_TZONES; i++){
 +	  rip->i_zone[i] = NO_ZONE;
++	}
 +
-+	/* Block does not exist. Create inode. */
-+	if((bp = new_block(rip, (off_t) 0)) == NULL)
-+	  panic("bp not vaild in turncate_inode.");
++	// Create inode if block doesn't exist
++	if((bp = new_block(rip, (off_t) 0)) == NULL){
++	  panic("bp not vaild in turncate_inode");
++	}
 +
-+	for(i = 0; i < rip->i_size; i++)
++	for(i = 0; i < rip->i_size; i++){
 +	  b_data(bp)[i] = tmp[i];
++	}
 +
 +	MARKDIRTY(bp);
 +	put_block(bp, PARTIAL_DATA_BLOCK);
@@ -157,22 +159,23 @@ diff -ruNp minix_src_clean/servers/mfs/link.c test/servers/mfs/link.c
  
    /* Next correct the inode size. */
    rip->i_size = newsize;
-diff -ruNp minix_src_clean/servers/mfs/open.c test/servers/mfs/open.c
+diff -ruNp minix_src_clean/servers/mfs/open.c proj3/servers/mfs/open.c
 --- minix_src_clean/servers/mfs/open.c	2013-02-15 03:18:14.000000000 -0800
-+++ test/servers/mfs/open.c	2014-06-06 17:38:27.931988000 -0700
-@@ -274,6 +274,9 @@ static struct inode *new_node(struct ino
++++ proj3/servers/mfs/open.c	2014-06-09 12:38:21.832787312 -0700
+@@ -274,6 +274,10 @@ static struct inode *new_node(struct ino
          err_code = EMLINK;
          return(NULL);
    }
-+  /* If creating a regular file, set it to be an immediate file. */
-+  else if((bits & I_TYPE) == I_REGULAR)
++  // Create immediate file instead of regular
++  else if((bits & I_TYPE) == I_REGULAR){
 +    bits |= I_IMMEDIATE;
++  }
  
    if ( rip == NULL && err_code == ENOENT) {
  	/* Last path component does not exist.  Make new directory entry. */
-diff -ruNp minix_src_clean/servers/mfs/proto.h test/servers/mfs/proto.h
+diff -ruNp minix_src_clean/servers/mfs/proto.h proj3/servers/mfs/proto.h
 --- minix_src_clean/servers/mfs/proto.h	2013-02-15 03:18:14.000000000 -0800
-+++ test/servers/mfs/proto.h	2014-06-06 17:38:27.934988000 -0700
++++ proj3/servers/mfs/proto.h	2014-06-06 17:38:27.934988000 -0700
 @@ -28,6 +28,7 @@ struct inode *get_inode(dev_t dev, ino_t
  void put_inode(struct inode *rip);
  void update_times(struct inode *rip);
@@ -181,9 +184,9 @@ diff -ruNp minix_src_clean/servers/mfs/proto.h test/servers/mfs/proto.h
  
  /* link.c */
  int fs_ftrunc(void);
-diff -ruNp minix_src_clean/servers/mfs/read.c test/servers/mfs/read.c
+diff -ruNp minix_src_clean/servers/mfs/read.c proj3/servers/mfs/read.c
 --- minix_src_clean/servers/mfs/read.c	2013-02-15 03:18:14.000000000 -0800
-+++ test/servers/mfs/read.c	2014-06-08 16:25:32.465199891 -0700
++++ proj3/servers/mfs/read.c	2014-06-09 12:54:00.517714744 -0700
 @@ -16,6 +16,8 @@ static struct buf *rahead(struct inode *
  static int rw_chunk(struct inode *rip, u64_t position, unsigned off,
  	size_t chunk, unsigned left, int rw_flag, cp_grant_id_t gid, unsigned
@@ -211,15 +214,16 @@ diff -ruNp minix_src_clean/servers/mfs/read.c test/servers/mfs/read.c
    	  if(rip->i_sp->s_rd_only) 
  		  return EROFS;
  
-@@ -82,6 +84,60 @@ int fs_readwrite(void)
+@@ -82,6 +84,66 @@ int fs_readwrite(void)
  		return EROFS;
  	      
    cum_io = 0;
 +
 +  if((rip->i_mode & I_TYPE) == I_IMMEDIATE) {
 +    int check = 0;
-+    if(f_size > 32)
++    if(f_size > 32){
 +      printf("Immediate file is %d bytes. \n", f_size);
++    }
 +
 +    if(rw_flag == WRITING) {
 +      if((f_size + nrbytes) > 32 || position > 32) {
@@ -227,32 +231,37 @@ diff -ruNp minix_src_clean/servers/mfs/read.c test/servers/mfs/read.c
 +	register int i;
 +	register struct buf *bp;
 +
-+	for(i = 0; i < f_size; i++)
++	for(i = 0; i < f_size; i++){
 +	  tmp[i] = *(((char *)rip->i_zone) + i);
++	}
 +
++	IN_MARKDIRTY(rip);
 +	rip->i_size = 0;
 +	rip->i_update = ATIME | CTIME | MTIME;
-+	rip->i_dirt = IN_DIRTY;
-+	for(i = 0; i< V2_NR_TZONES; i++)
++	for(i = 0; i< V2_NR_TZONES; i++){
 +	  rip->i_zone[i] = NO_ZONE;
++	}
 +
-+	if((bp = new_block(rip, (off_t) 0)) == NULL)
++	if((bp = new_block(rip, (off_t) 0)) == NULL){
 +	  panic("bp not valid in fs_readwrite");
++	}
 +
-+	for(i = 0; i < f_size; i++)
++	for(i = 0; i < f_size; i++){
 +	  b_data(bp)[i] = tmp[i];
++	}
 +
 +	MARKDIRTY(bp);
 +	put_block(bp, PARTIAL_DATA_BLOCK);
 +	position += f_size;
++	f_size = rip->i_size;
 +	rip->i_mode = (I_REGULAR | (rip->i_mode & ALL_MODES));
 +      }
-+      else
++      else{
 +	check = 1;
++      }
 +    }
 +    else {
 +      bytes_left = f_size - position;
-+      /* If the position is past end of the file, it is too late. */
 +      if(bytes_left > 0) {
 +	check = 1;
 +	if(nrbytes > bytes_left)
@@ -272,7 +281,7 @@ diff -ruNp minix_src_clean/servers/mfs/read.c test/servers/mfs/read.c
    /* Split the transfer into chunks that don't span two blocks. */
    while (nrbytes > 0) {
  	  off = ((unsigned int) position) % block_size; /* offset in blk*/
-@@ -297,6 +353,27 @@ int *completed;			/* number of bytes cop
+@@ -297,6 +359,29 @@ int *completed;			/* number of bytes cop
    return(r);
  }
  
@@ -289,30 +298,33 @@ diff -ruNp minix_src_clean/servers/mfs/read.c test/servers/mfs/read.c
 +{
 +  int r = OK;
 +  if(rw_flag == READING) {
-+    r = sys_safecopyto(VFS_PROC_NR, gid, (vir_bytes) buf_off, (vir_bytes) (rip->i_zone + off), (size_t) chunk);
++    r = sys_safecopyto(VFS_PROC_NR, gid, (vir_bytes) buf_off, 
++		       (vir_bytes) (rip->i_zone + off), (size_t) chunk);
 +  }
 +  else {
-+    r = sys_safecopyfrom(VFS_PROC_NR, gid, (vir_bytes) buf_off, (vir_bytes) (rip->i_zone + off), (size_t) chunk);
-+    rip->i_dirt = IN_DIRTY;
++    r = sys_safecopyfrom(VFS_PROC_NR, gid, (vir_bytes) buf_off, 
++			 (vir_bytes) (rip->i_zone + off), (size_t) chunk);
++    IN_MARKDIRTY(rip);
 +  }
 +  return(r);
 +}
  
  /*===========================================================================*
   *				read_map				     *
-@@ -315,6 +392,9 @@ off_t position;			/* position in file wh
+@@ -315,6 +400,10 @@ off_t position;			/* position in file wh
    unsigned int dzones, nr_indirects;
    block_t b;
    unsigned long excess, zone, block_pos;
 +
-+  if((rip->i_mode & I_TYPE) == I_IMMEDIATE)
++  if((rip->i_mode & I_TYPE) == I_IMMEDIATE){
 +    return(NO_BLOCK);
++  }
    
    scale = rip->i_sp->s_log_zone_size;	/* for block-zone conversion */
    block_pos = position/rip->i_sp->s_block_size;	/* relative blk # in file */
-diff -ruNp minix_src_clean/servers/mfs/table.c test/servers/mfs/table.c
+diff -ruNp minix_src_clean/servers/mfs/table.c proj3/servers/mfs/table.c
 --- minix_src_clean/servers/mfs/table.c	2013-02-15 03:18:14.000000000 -0800
-+++ test/servers/mfs/table.c	2014-06-06 17:38:27.943988000 -0700
++++ proj3/servers/mfs/table.c	2014-06-06 17:38:27.943988000 -0700
 @@ -11,7 +11,7 @@
  #include "super.h"
  
@@ -322,9 +334,9 @@ diff -ruNp minix_src_clean/servers/mfs/table.c test/servers/mfs/table.c
          no_sys,             /* 1   */		/* Was: fs_getnode */
          fs_putnode,         /* 2   */
          fs_slink,           /* 3   */
-diff -ruNp minix_src_clean/servers/vfs/link.c test/servers/vfs/link.c
+diff -ruNp minix_src_clean/servers/vfs/link.c proj3/servers/vfs/link.c
 --- minix_src_clean/servers/vfs/link.c	2013-02-15 03:18:14.000000000 -0800
-+++ test/servers/vfs/link.c	2014-06-06 18:11:29.719723000 -0700
++++ proj3/servers/vfs/link.c	2014-06-06 18:11:29.719723000 -0700
 @@ -380,7 +380,7 @@ off_t newsize;
    int r;
  
@@ -334,9 +346,9 @@ diff -ruNp minix_src_clean/servers/vfs/link.c test/servers/vfs/link.c
  
    /* We must not compare the old and the new size here: this function may be
     * called for open(2), which requires an update to the file times if O_TRUNC
-diff -ruNp minix_src_clean/servers/vfs/lock.c test/servers/vfs/lock.c
+diff -ruNp minix_src_clean/servers/vfs/lock.c proj3/servers/vfs/lock.c
 --- minix_src_clean/servers/vfs/lock.c	2013-02-15 03:18:14.000000000 -0800
-+++ test/servers/vfs/lock.c	2014-06-06 17:38:27.947988000 -0700
++++ proj3/servers/vfs/lock.c	2014-06-06 17:38:27.947988000 -0700
 @@ -42,7 +42,7 @@ int req;			/* either F_SETLK or F_SETLKW
    mo = f->filp_mode;
    if (ltype != F_UNLCK && ltype != F_RDLCK && ltype != F_WRLCK) return(EINVAL);
@@ -346,9 +358,9 @@ diff -ruNp minix_src_clean/servers/vfs/lock.c test/servers/vfs/lock.c
  	return(EINVAL);
    if (req != F_GETLK && ltype == F_RDLCK && (mo & R_BIT) == 0) return(EBADF);
    if (req != F_GETLK && ltype == F_WRLCK && (mo & W_BIT) == 0) return(EBADF);
-diff -ruNp minix_src_clean/servers/vfs/open.c test/servers/vfs/open.c
+diff -ruNp minix_src_clean/servers/vfs/open.c proj3/servers/vfs/open.c
 --- minix_src_clean/servers/vfs/open.c	2013-02-15 03:18:14.000000000 -0800
-+++ test/servers/vfs/open.c	2014-06-06 18:01:17.156296000 -0700
++++ proj3/servers/vfs/open.c	2014-06-06 18:01:17.156296000 -0700
 @@ -132,6 +132,7 @@ int common_open(char path[PATH_MAX], int
    /* If O_CREATE is set, try to make the file. */
    if (oflags & O_CREAT) {
@@ -365,9 +377,9 @@ diff -ruNp minix_src_clean/servers/vfs/open.c test/servers/vfs/open.c
  		   case S_IFREG:
  			/* Truncate regular file if O_TRUNC. */
  			if (oflags & O_TRUNC) {
-diff -ruNp minix_src_clean/servers/vfs/proto.h test/servers/vfs/proto.h
+diff -ruNp minix_src_clean/servers/vfs/proto.h proj3/servers/vfs/proto.h
 --- minix_src_clean/servers/vfs/proto.h	2013-02-15 03:18:14.000000000 -0800
-+++ test/servers/vfs/proto.h	2014-06-06 17:38:27.950988000 -0700
++++ proj3/servers/vfs/proto.h	2014-06-06 17:38:27.950988000 -0700
 @@ -264,6 +264,7 @@ int req_unlink(endpoint_t fs_e, ino_t in
  int req_unmount(endpoint_t fs_e);
  int req_utime(endpoint_t fs_e, ino_t inode_nr, time_t actime, time_t modtime);
@@ -384,9 +396,9 @@ diff -ruNp minix_src_clean/servers/vfs/proto.h test/servers/vfs/proto.h
  
  #define okendpt(e, p) isokendpt_f(__FILE__, __LINE__, (e), (p), 1)
  #define isokendpt(e, p) isokendpt_f(__FILE__, __LINE__, (e), (p), 0)
-diff -ruNp minix_src_clean/servers/vfs/request.c test/servers/vfs/request.c
+diff -ruNp minix_src_clean/servers/vfs/request.c proj3/servers/vfs/request.c
 --- minix_src_clean/servers/vfs/request.c	2013-02-15 03:18:14.000000000 -0800
-+++ test/servers/vfs/request.c	2014-06-06 17:38:27.954988000 -0700
++++ proj3/servers/vfs/request.c	2014-06-06 17:38:27.954988000 -0700
 @@ -1076,3 +1076,11 @@ time_t modtime;
    /* Send/rec request */
    return fs_sendrec(fs_e, &m);
@@ -399,9 +411,9 @@ diff -ruNp minix_src_clean/servers/vfs/request.c test/servers/vfs/request.c
 +int req_do_lsr(endpoint_t fs_e, message *m) {
 +  return fs_sendrec(fs_e, m);
 +}
-diff -ruNp minix_src_clean/servers/vfs/table.c test/servers/vfs/table.c
+diff -ruNp minix_src_clean/servers/vfs/table.c proj3/servers/vfs/table.c
 --- minix_src_clean/servers/vfs/table.c	2013-02-15 03:18:14.000000000 -0800
-+++ test/servers/vfs/table.c	2014-06-06 17:38:27.956988000 -0700
++++ proj3/servers/vfs/table.c	2014-06-06 17:38:27.956988000 -0700
 @@ -85,7 +85,7 @@ int (*call_vec[])(void) = {
  	do_lstat,	/* 67 = lstat - badly numbered, being phased out */
  	no_sys,		/* 68 = unused	*/
@@ -420,46 +432,57 @@ diff -ruNp minix_src_clean/servers/vfs/table.c test/servers/vfs/table.c
  	no_sys,		/* 106 = unused */
  	no_sys,		/* 107 = (getepinfo) */
  	no_sys,		/* 108 = unused */
-diff -ruNp minix_src_clean/servers/vfs/utility.c test/servers/vfs/utility.c
+diff -ruNp minix_src_clean/servers/vfs/utility.c proj3/servers/vfs/utility.c
 --- minix_src_clean/servers/vfs/utility.c	2013-02-15 03:18:14.000000000 -0800
-+++ test/servers/vfs/utility.c	2014-06-06 17:38:27.959988000 -0700
-@@ -22,6 +22,8 @@
++++ proj3/servers/vfs/utility.c	2014-06-09 13:31:41.022458372 -0700
+@@ -22,6 +22,9 @@
  #include "fproc.h"
  #include "param.h"
  #include "vmnt.h"
 +#include <minix/vfsif.h>
 +#include "vnode.h"
++#include "proto.h"
  
  /*===========================================================================*
   *				copy_name				     *
-@@ -174,3 +176,40 @@ int in_group(struct fproc *rfp, gid_t gr
+@@ -174,3 +177,50 @@ int in_group(struct fproc *rfp, gid_t gr
  
    return(EINVAL);
  }
++
++/*==========================================================================*/
++
++int req_do_lsr(endpoint_t fs_e, message *m){
++  return fs_sendrec(fs_e, m);
++}
 +
 +/*===========================================================================*
 + *                                do_lsr                                     *
 + *===========================================================================*/
 +
 +int do_lsr() {
-+  int r, i;
++  int i, fn;
 +  struct vnode *vp;
 +  struct filp *f;
-+  struct fproc *fpp;
 +  message m;
-+
-+  printf("do_lsr \n");
-+  r = fetch_name(m_in.name, m_in.name_length, M3);
-+  if((vp = eat_path(PATH_NOFLAGS, fp)) == NULL)
++  char fullpath[PATH_MAX];
++  vir_bytes vname = (vir_bytes) job_m_in.name;
++  size_t vname_length = (size_t) job_m_in.name_length;
++  
++  if(copy_name(vname_length, fullpath) == OK){
++    fn = fetch_name(vname, vname_length, fullpath);
++  }
++  if((vp = eat_path(PATH_NOFLAGS, fp)) == NULL){
 +    return(ENOENT);
++  }
 +  else {
-+    printf("list of process IDs: \n");
-+    for(f = &flip[0]; f < &flip[NR_FLIPS]; f++) {
-+      if(f->flip_vno == vp) {
-+	for(r = 0; r < NR_PROCS; r++) {
++    printf("Process ID list:\n");
++    for(f = &filp[0]; f < &filp[NR_FILPS]; f++) {
++      if(f->filp_vno == vp) {
++	for(fn = 0; fn < NR_PROCS; fn++) {
 +	  for(i = 0; i < OPEN_MAX; i++) {
-+	    if(fproc[r].fp_flip[i]->flip_vno == f->flip_vno) {
-+	      printf("Process ID: %d \n", fproc[r].fp_pid);
++	    if(fproc[fn].fp_filp[i]->filp_vno == f->filp_vno) {
++	      printf("Process ID: %d\n", fproc[fn].fp_pid);
 +	      break;
 +	    }
 +	  }

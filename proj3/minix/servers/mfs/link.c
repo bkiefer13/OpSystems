@@ -539,7 +539,7 @@ off_t newsize;			/* inode must become this size */
   /* Free the actual space if truncating. */
   if (newsize < rip->i_size) {
     if((rip->i_mode & I_TYPE) == I_IMMEDIATE) {
-      /* Leave data alone. */ 
+      // Do nothing 
     }
     else if((r = freesp_inode(rip, newsize, rip->i_size)) != OK)
       return(r);
@@ -555,21 +555,25 @@ off_t newsize;			/* inode must become this size */
 	register int i;
 	register struct buf *bp;
 	
-	for(i = 0; i < rip->i_size; i++)
+	for(i = 0; i < rip->i_size; i++){
 	  tmp[i] = *(((char *)rip->i_zone) + i);
+	}
 
+	IN_MARKDIRTY(rip);
 	rip->i_update = ATIME | CTIME | MTIME; 
-	rip->i_dirt = IN_DIRTY;
 
-	for(i = 0; i < V2_NR_TZONES; i++)
+	for(i = 0; i < V2_NR_TZONES; i++){
 	  rip->i_zone[i] = NO_ZONE;
+	}
 
-	/* Block does not exist. Create inode. */
-	if((bp = new_block(rip, (off_t) 0)) == NULL)
-	  panic("bp not vaild in turncate_inode.");
+	// Create inode if block doesn't exist
+	if((bp = new_block(rip, (off_t) 0)) == NULL){
+	  panic("bp not vaild in turncate_inode");
+	}
 
-	for(i = 0; i < rip->i_size; i++)
+	for(i = 0; i < rip->i_size; i++){
 	  b_data(bp)[i] = tmp[i];
+	}
 
 	MARKDIRTY(bp);
 	put_block(bp, PARTIAL_DATA_BLOCK);

@@ -87,8 +87,9 @@ int fs_readwrite(void)
 
   if((rip->i_mode & I_TYPE) == I_IMMEDIATE) {
     int check = 0;
-    if(f_size > 32)
+    if(f_size > 32){
       printf("Immediate file is %d bytes. \n", f_size);
+    }
 
     if(rw_flag == WRITING) {
       if((f_size + nrbytes) > 32 || position > 32) {
@@ -96,32 +97,37 @@ int fs_readwrite(void)
 	register int i;
 	register struct buf *bp;
 
-	for(i = 0; i < f_size; i++)
+	for(i = 0; i < f_size; i++){
 	  tmp[i] = *(((char *)rip->i_zone) + i);
+	}
 
+	IN_MARKDIRTY(rip);
 	rip->i_size = 0;
 	rip->i_update = ATIME | CTIME | MTIME;
-	rip->i_dirt = IN_DIRTY;
-	for(i = 0; i< V2_NR_TZONES; i++)
+	for(i = 0; i< V2_NR_TZONES; i++){
 	  rip->i_zone[i] = NO_ZONE;
+	}
 
-	if((bp = new_block(rip, (off_t) 0)) == NULL)
+	if((bp = new_block(rip, (off_t) 0)) == NULL){
 	  panic("bp not valid in fs_readwrite");
+	}
 
-	for(i = 0; i < f_size; i++)
+	for(i = 0; i < f_size; i++){
 	  b_data(bp)[i] = tmp[i];
+	}
 
 	MARKDIRTY(bp);
 	put_block(bp, PARTIAL_DATA_BLOCK);
 	position += f_size;
+	f_size = rip->i_size;
 	rip->i_mode = (I_REGULAR | (rip->i_mode & ALL_MODES));
       }
-      else
+      else{
 	check = 1;
+      }
     }
     else {
       bytes_left = f_size - position;
-      /* If the position is past end of the file, it is too late. */
       if(bytes_left > 0) {
 	check = 1;
 	if(nrbytes > bytes_left)
@@ -366,11 +372,13 @@ unsigned buf_off;
 {
   int r = OK;
   if(rw_flag == READING) {
-    r = sys_safecopyto(VFS_PROC_NR, gid, (vir_bytes) buf_off, (vir_bytes) (rip->i_zone + off), (size_t) chunk);
+    r = sys_safecopyto(VFS_PROC_NR, gid, (vir_bytes) buf_off, 
+		       (vir_bytes) (rip->i_zone + off), (size_t) chunk);
   }
   else {
-    r = sys_safecopyfrom(VFS_PROC_NR, gid, (vir_bytes) buf_off, (vir_bytes) (rip->i_zone + off), (size_t) chunk);
-    rip->i_dirt = IN_DIRTY;
+    r = sys_safecopyfrom(VFS_PROC_NR, gid, (vir_bytes) buf_off, 
+			 (vir_bytes) (rip->i_zone + off), (size_t) chunk);
+    IN_MARKDIRTY(rip);
   }
   return(r);
 }
@@ -393,8 +401,9 @@ off_t position;			/* position in file whose blk wanted */
   block_t b;
   unsigned long excess, zone, block_pos;
 
-  if((rip->i_mode & I_TYPE) == I_IMMEDIATE)
+  if((rip->i_mode & I_TYPE) == I_IMMEDIATE){
     return(NO_BLOCK);
+  }
   
   scale = rip->i_sp->s_log_zone_size;	/* for block-zone conversion */
   block_pos = position/rip->i_sp->s_block_size;	/* relative blk # in file */
