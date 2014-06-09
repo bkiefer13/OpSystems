@@ -16,7 +16,7 @@ static struct buf *rahead(struct inode *rip, block_t baseblock, u64_t
 static int rw_chunk(struct inode *rip, u64_t position, unsigned off,
 	size_t chunk, unsigned left, int rw_flag, cp_grant_id_t gid, unsigned
 	buf_off, unsigned int block_size, int *completed);
-static in rw_immed(struct inode *rip, unsigned off, size_t chunk, int rw_flag,
+static int rw_immed(struct inode *rip, unsigned off, size_t chunk, int rw_flag,
 	cp_grant_id_t gid, unsigned buf_off);
 
 
@@ -42,7 +42,7 @@ int fs_readwrite(void)
 	return(EINVAL);
 
   mode_word = rip->i_mode & I_TYPE;
-  regular = (mode_word == I_REGULAR || mode_word == I_IMMEDIATE || mode_word == I_NAMED_PIPE);
+  regular = (mode_word == I_REGULAR || mode_word == I_NAMED_PIPE || mode_word == I_IMMEDIATE);
   block_spec = (mode_word == I_BLOCK_SPECIAL ? 1 : 0);
   
   /* Determine blocksize */
@@ -86,13 +86,13 @@ int fs_readwrite(void)
   cum_io = 0;
 
   if((rip->i_mode & I_TYPE) == I_IMMEDIATE) {
-    int sanity = 0;
-    if(f_size > 40)
+    int check = 0;
+    if(f_size > 32)
       printf("Immediate file is %d bytes. \n", f_size);
 
     if(rw_flag == WRITING) {
-      if((f_size + nrbytes) > 40 || position > 40) {
-	char tmp[40];
+      if((f_size + nrbytes) > 32 || position > 32) {
+	char tmp[32];
 	register int i;
 	register struct buf *bp;
 
@@ -109,26 +109,26 @@ int fs_readwrite(void)
 	  panic("bp not valid in fs_readwrite");
 
 	for(i = 0; i < f_size; i++)
-	  bp->b_data[i] = tmp[i];
+	  b_data(bp)[i] = tmp[i];
 
-	bp->b_dirt = IN_DIRTY;
+	MARKDIRTY(bp);
 	put_block(bp, PARTIAL_DATA_BLOCK);
 	position += f_size;
 	rip->i_mode = (I_REGULAR | (rip->i_mode & ALL_MODES));
       }
       else
-	sanity = 1;
+	check = 1;
     }
     else {
       bytes_left = f_size - position;
       /* If the position is past end of the file, it is too late. */
       if(bytes_left > 0) {
-	sanity = 1;
+	check = 1;
 	if(nrbytes > bytes_left)
 	  nrbytes = bytes_left;
       }
     }
-    if(sanity) {
+    if(check) {
       r = rw_immed(rip, position, nrbytes, rw_flag, gid, cum_io);
       if(r == OK) {
 	cum_io += nrbytes;
@@ -365,11 +365,11 @@ cp_grant_id_t gid;
 unsigned buf_off;
 {
   int r = OK;
-  if(rw_flag = READING) {
-    r = sys_safecopyto(VFS_PROC_NR, gid, (vir_bytes) buf_off, (vir_bytes) (rip->i_zone + off), (size_t) chunk, D);
+  if(rw_flag == READING) {
+    r = sys_safecopyto(VFS_PROC_NR, gid, (vir_bytes) buf_off, (vir_bytes) (rip->i_zone + off), (size_t) chunk);
   }
   else {
-    r = sys_safecopyfrom(VFS_PROC_NR, gid, (vir_bytes) buf_off, (vir_bytes) (rip->i_zone + off), (size_t) chunk, D);
+    r = sys_safecopyfrom(VFS_PROC_NR, gid, (vir_bytes) buf_off, (vir_bytes) (rip->i_zone + off), (size_t) chunk);
     rip->i_dirt = IN_DIRTY;
   }
   return(r);

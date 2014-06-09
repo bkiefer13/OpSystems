@@ -548,10 +548,10 @@ off_t newsize;			/* inode must become this size */
       rip->i_mode = I_IMMEDIATE | (rip->i_mode & ALL_MODES);
   }
   /* Clear the rest of the last zone if expanding. */
-  else if(newsize > rip->i_size) {
+  if(newsize > rip->i_size) {
     if((rip->i_mode & I_TYPE) == I_IMMEDIATE) {
-      if(newsize > 40) {
-	char tmp[40];
+      if(newsize > 32) {
+	char tmp[32];
 	register int i;
 	register struct buf *bp;
 	
@@ -569,9 +569,9 @@ off_t newsize;			/* inode must become this size */
 	  panic("bp not vaild in turncate_inode.");
 
 	for(i = 0; i < rip->i_size; i++)
-	  bp->b_data[i] = tmp[i];
+	  b_data(bp)[i] = tmp[i];
 
-	bp->b_dirt = IN_DIRTY;
+	MARKDIRTY(bp);
 	put_block(bp, PARTIAL_DATA_BLOCK);
 	rip->i_mode = (I_REGULAR | (rip->i_mode & ALL_MODES));
 	clear_zone(rip, rip->i_size, 0);

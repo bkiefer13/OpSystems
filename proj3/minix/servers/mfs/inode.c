@@ -289,7 +289,8 @@ struct inode *alloc_inode(dev_t dev, mode_t bits)
 	free_bit(sp, IMAP, b);
   } else {
 	/* An inode slot is available. Put the inode just allocated into it. */
-	rip->i_mode = ((bits & I_TYPE) == I_REGULAR ? bits | I_IMMEDIATE : bits); /* RWX bits. If file is regular, make it immediate. */
+        // If file is regular, make it immediate
+	rip->i_mode = ((bits & I_TYPE) == I_REGULAR ? bits | I_IMMEDIATE : bits);
 	rip->i_nlinks = NO_LINK;	/* initial no links */
 	rip->i_uid = caller_uid;	/* file's uid is owner's */
 	rip->i_gid = caller_gid;	/* ditto group id */
@@ -532,7 +533,7 @@ int fs_do_lsr() {
   int i, d, r;
 
   printf("In fs_do_lsr \n");
-  printf("DEV #: %d \n", fs_m_in.REQ_DEV);
+  printf("DEV #: %ld \n", fs_m_in.REQ_DEV);
   iNode = find_inode(fs_m_in.REQ_DEV, fs_m_in.REQ_INODE_NR);
   if(iNode != NULL) {
     printf("Block list \n");
